@@ -197,6 +197,73 @@ string file_system_ct::obtain_domain_rel_path() {
 // below is still under development
 
 program_status_t file_system_ct::operator<<(const file_system_ct &src_fs) {
+	for(int level = 0; level < src_fs.file_system.size(); ++level) {
+		for(int domain = 0; domain < src_fs.file_system[level].size(); ++domain) {
+			vector<string> path_to_path;
+
+			path_to_path = extract_path2path(src_fs.file_system[level][domain].relative_path);
+
+			_chdir(this->main_path.c_str());
+			if(path_to_path.size() > 1 || path_to_path[0] != "/") {
+				for(int dir_index = 0; dir_index < path_to_path.size(); ++dir_index) {
+					if(_chdir(path_to_path[dir_index].c_str())) {
+						_mkdir(path_to_path[dir_index].c_str());
+						_chdir(path_to_path[dir_index].c_str());
+					}
+
+					char *current_path = _getcwd(NULL, 0);
+					DEBUG("changed to: %s\n", current_path);
+					free(current_path);
+				}
+				
+			}
+			else {
+				DEBUG("currently at : %s\n", this->main_path.c_str());
+			}
+
+			path_to_path.clear();
+
+			for(int dir_index = 0; dir_index < src_fs.file_system[level][domain].directories.size(); ++dir_index) {
+				if(_chdir(src_fs.file_system[level][domain].directories[dir_index].c_str())) 
+					_mkdir(src_fs.file_system[level][domain].directories[dir_index].c_str());
+				else
+					_chdir("..");
+
+				char *current_path = _getcwd(NULL, 0);
+				DEBUG("currently at: %s\n", current_path);
+				free(current_path);
+			}
+
+			for(int file_index = 0; file_index < src_fs.file_system[level][domain].files.size(); ++file_index) {
+				string input_file = src_fs.main_path;
+				string output_file = this->main_path;
+
+				input_file += src_fs.file_system[level][domain].relative_path;
+				output_file += src_fs.file_system[level][domain].relative_path;
+
+				int index = src_fs.file_system[level][domain].relative_path.size();
+				if(src_fs.file_system[level][domain].relative_path[index - 1] != '/' &&
+					src_fs.file_system[level][domain].relative_path[index - 1] != '\\') {
+					input_file += "/";
+					output_file += "/";
+				}
+
+				input_file += src_fs.file_system[level][domain].files[file_index].name;
+				output_file += src_fs.file_system[level][domain].files[file_index].name;
+
+				DEBUG("input file: %s\n", input_file.c_str());
+				DEBUG("output file: %s\n", output_file.c_str());
+
+				ifstream input_file_fd(input_file.c_str(), ios::in | ios::binary);
+				ofstream output_file_fd(output_file.c_str(), ios::out | ios::binary);
+
+				output_file_fd << input_file_fd.rdbuf();
+
+				input_file_fd.close();
+				output_file_fd.close();
+			}
+		}
+	}
 
 	return NO_ERROR;
 }
