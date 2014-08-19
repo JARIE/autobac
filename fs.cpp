@@ -276,10 +276,11 @@ program_status_t file_system_ct::operator<<(const file_system_ct &src_fs) {
 					_mkdir(src_fs.file_system[level][domain].directories[dir_index].c_str());
 				else
 					_chdir("..");
-
+#ifdef DEBUG
 				char *current_path = _getcwd(NULL, 0);
 				DEBUG_PRINT("currently at: %s\n", current_path);
 				free(current_path);
+#endif
 			}
 
 			for(int file_index = 0; file_index < src_fs.file_system[level][domain].files.size(); ++file_index) {
