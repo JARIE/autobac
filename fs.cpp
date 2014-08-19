@@ -49,23 +49,42 @@ string file_system_ct::get_main_path() {
 void file_system_ct::display_dir_domains() {
 	for(int level = 0; level < file_system.size(); ++level) {
 		cout << "level: " << level << endl;
-		for(int domain = 0; domain < file_system[level].size(); ++domain) {
+		for(int domain = 0; domain < file_system[level].size(); 
+			++domain) {
 			cout << "\tdomain: " << domain << endl;
-			cout << "\t\t" << "relative path: " << file_system[level][domain].relative_path.c_str() << endl;
-			for(int index = 0; index < file_system[level][domain].directories.size(); ++index)
-				cout << "\t\t" << file_system[level][domain].directories[index].c_str() << endl;
-			for(int index = 0; index < file_system[level][domain].files.size(); ++index) {
-				cout << "\t\t" << file_system[level][domain].files[index].name.c_str() << endl;;
-				/*
-				cout << " - ";
-				cout << file_system[level][domain].files[index].date_time.month << '/';
-				cout << file_system[level][domain].files[index].date_time.day << '/';
-				cout << file_system[level][domain].files[index].date_time.year << ' ';
-				cout << file_system[level][domain].files[index].date_time.hour << ':';
-				cout << file_system[level][domain].files[index].date_time.minute << endl;
-				*/
-			}
+			cout << "\t\t" << "relative path: " 
+			     << file_system[level][domain].relative_path.c_str() 
+			     << endl;
+			display_contents(level, domain);
 		}
+	}
+}
+
+void file_system_ct::display_contents(int level, int domain) {
+	for(int index = 0; 
+		index < file_system[level][domain].directories.size(); ++index)
+		cout << "\t\t" 
+		     << file_system[level][domain].directories[index].c_str()
+		     << endl;
+	for(int index = 0; index < file_system[level][domain].files.size(); 
+		++index) {
+		cout << "\t\t" 
+		     << file_system[level][domain].files[index].name.c_str()
+		     << endl;;
+		/*
+		cout << " - ";
+		cout << file_system[level][domain].files[index].date_time.month 
+			<< '/';
+		cout << file_system[level][domain].files[index].date_time.day 
+			<< '/';
+		cout << file_system[level][domain].files[index].date_time.year 
+			<< ' ';
+		cout << file_system[level][domain].files[index].date_time.hour 
+			<< ':';
+		cout << file_system[level][domain].files[index].date_time.minute 
+			<< endl;
+		*/
+										
 	}
 }
 
@@ -100,29 +119,41 @@ void file_system_ct::populate_filesys() {
 		dir_domain_st dir_domain;
 		string domain_rel_path;
 
-		// extract all file and directory names as well as the file attributes to the corresponding files
+		// extract all file and directory names as well as the file 
+		// attributes to the corresponding files
 
-		// @dirparser_ct::parse_dir_domain() - modify funtion name to reflect actual task of finding contents ir directory
+		// @dirparser_ct::parse_dir_domain() - modify funtion name 
+		// to reflect actual task of finding contents ir directory
 		// not relative path
 		directory_status = dirparser_ct::parse_dir_domain(); 
 
 		if(directory_status == NON_EMPTY) {
-			// retrieve the information gathered from previous function call
+			// retrieve the information gathered from previous 
+			// function call
 
-			// @dirparser_ct::get_dir_domain() - just as the previous call, modify function name to reflect true task
+			// @dirparser_ct::get_dir_domain() - just as the 
+			// previous call, modify function name to reflect 
+			// true task
 			dir_domain = dirparser_ct::get_dir_domain(); 
-			// get the relative path from the start of the main path
+			// get the relative path from the start of the main 
+			// path
 			domain_rel_path = obtain_domain_rel_path();
-			// store that relative path with the data structure containing the file names/attributes and directory names all in
-			// one place
+			// store that relative path with the data structure 
+			// containing the file names/attributes and directory 
+			// names all in one place
 			dir_domain.relative_path = domain_rel_path;
 			// store the domain onto the current level
-			store_dir_domain(level, dir_domain.files, dir_domain.relative_path, dir_domain.directories);
-			for(int index = 0; index < dir_domain.directories.size(); ++index) {
-				//save the directories onto to current_level for visiting later to parse the contents
+			store_dir_domain(level, dir_domain.files, 
+			      dir_domain.relative_path, dir_domain.directories);
+			for(int index = 0; 
+				index < dir_domain.directories.size(); 
+				++index) {
+				//save the directories onto to current_level 
+				// for visiting later to parse the contents
 
-				// @push_back() - strings pushed are only names need to include the path between the main path and the
-				// directory
+				// @push_back() - strings pushed are only names 
+				// need to include the path between the main 
+				// path and the directory
 				string path_buffer = dir_domain.relative_path;
 				if(dir_domain.relative_path != "/")
 					path_buffer += '/';
@@ -131,17 +162,21 @@ void file_system_ct::populate_filesys() {
 			}
 		}
 
-		// remove the directory from top level and attempt to go to the next one
+		// remove the directory from top level and attempt to go to 
+		// the next one
 		top_level.pop_back();
 
 		if(top_level.empty() && !current_level.empty()) {
-			// since all domains have been resolved, get ready to go fill in the next level
+			// since all domains have been resolved, get ready to 
+			// go fill in the next level
 			++level;
 			// update top_level with current_level
 			top_level = current_level;
-			// clear the current level to get ready for the next current level
+			// clear the current level to get ready for the next 
+			// current level
 			current_level.clear();
-			// need to change into directory specified at last element of top_level
+			// need to change into directory specified at last 
+			// element of top_level
 			uint16_t index = top_level.size() - 1;
 			string new_path = main_path;
 			//cout << main_path << endl;
@@ -151,7 +186,8 @@ void file_system_ct::populate_filesys() {
 		}
 		else if((!top_level.empty() && !current_level.empty()) || 
 			(!top_level.empty() && current_level.empty())) {
-			// need to change into directory specified at last element of top_level
+			// need to change into directory specified at last 
+			// element of top_level
 			uint16_t index = top_level.size() - 1;
 			string new_path = main_path;
 			//cout << main_path << endl;
@@ -194,43 +230,55 @@ string file_system_ct::obtain_domain_rel_path() {
 	return rel_path;
 }
 
-// below is still under development
-
 program_status_t file_system_ct::operator<<(const file_system_ct &src_fs) {
 	for(int level = 0; level < src_fs.file_system.size(); ++level) {
-		for(int domain = 0; domain < src_fs.file_system[level].size(); ++domain) {
+		for(int domain = 0; domain < src_fs.file_system[level].size(); 
+			++domain) {
 			vector<string> path_to_path;
+			string relative_path;
+			relative_path = 
+			       src_fs.file_system[level][domain].relative_path;
 
-			path_to_path = extract_path2path(src_fs.file_system[level][domain].relative_path);
+			path_to_path = extract_path2path(relative_path);
 
 			_chdir(this->main_path.c_str());
 			if(path_to_path.size() > 1 || path_to_path[0] != "/") {
-				for(int dir_index = 0; dir_index < path_to_path.size(); ++dir_index) {
-					if(_chdir(path_to_path[dir_index].c_str())) {
-						_mkdir(path_to_path[dir_index].c_str());
-						_chdir(path_to_path[dir_index].c_str());
+				for(int dir_index = 0; 
+					dir_index < path_to_path.size(); 
+					++dir_index) {
+					string dir;
+					dir = path_to_path[dir_index];
+					if(_chdir(dir.c_str())) {
+						_mkdir(dir.c_str());
+						_chdir(dir.c_str());
 					}
-
+#ifdef DEBUG
 					char *current_path = _getcwd(NULL, 0);
-					DEBUG("changed to: %s\n", current_path);
+					DEBUG_PRINT("changed to: %s\n", 
+						current_path);
 					free(current_path);
+#endif
 				}
 				
 			}
+#ifdef DEBUG
 			else {
-				DEBUG("currently at : %s\n", this->main_path.c_str());
+				DEBUG_PRINT("currently at : %s\n", 
+					this->main_path.c_str());
 			}
+#endif
 
 			path_to_path.clear();
 
-			for(int dir_index = 0; dir_index < src_fs.file_system[level][domain].directories.size(); ++dir_index) {
+			for(int dir_index = 0; 
+				dir_index < src_fs.file_system[level][domain].directories.size(); ++dir_index) {
 				if(_chdir(src_fs.file_system[level][domain].directories[dir_index].c_str())) 
 					_mkdir(src_fs.file_system[level][domain].directories[dir_index].c_str());
 				else
 					_chdir("..");
 
 				char *current_path = _getcwd(NULL, 0);
-				DEBUG("currently at: %s\n", current_path);
+				DEBUG_PRINT("currently at: %s\n", current_path);
 				free(current_path);
 			}
 
@@ -251,8 +299,8 @@ program_status_t file_system_ct::operator<<(const file_system_ct &src_fs) {
 				input_file += src_fs.file_system[level][domain].files[file_index].name;
 				output_file += src_fs.file_system[level][domain].files[file_index].name;
 
-				DEBUG("input file: %s\n", input_file.c_str());
-				DEBUG("output file: %s\n", output_file.c_str());
+				DEBUG_PRINT("input file: %s\n", input_file.c_str());
+				DEBUG_PRINT("output file: %s\n", output_file.c_str());
 
 				ifstream input_file_fd(input_file.c_str(), ios::in | ios::binary);
 				ofstream output_file_fd(output_file.c_str(), ios::out | ios::binary);

@@ -67,7 +67,8 @@ h_opt_ct::h_opt_ct(existence_t existence) : opt_ct(existence) {
 void h_opt_ct::show_help() {
 	cout << "usage: autobac [options/arguments]" << endl;
 	cout << endl;
-	cout << "-h\tdisplays the available options and their descriptions" << endl;
+	cout << "-h\tdisplays the available options and their descriptions" 
+		<< endl;
 	cout << "-d\tspecifies the destination location to backup to" << endl;
 	cout << "-s\tspecifies the source location to backup from" << endl;
 }
@@ -82,11 +83,16 @@ s_opt_ct::s_opt_ct(existence_t existence) : opt_ct(existence) {
 
 // class optarg_parse_ct implementation
 
-optarg_parser_ct::optarg_parser_ct(existence_t hopt_arg_exist, existence_t dopt_arg_exist, existence_t sopt_arg_exist) :
-	h_opt_ct(hopt_arg_exist), d_opt_ct(dopt_arg_exist), s_opt_ct(sopt_arg_exist) {
+optarg_parser_ct::optarg_parser_ct(existence_t hopt_arg_exist, 
+				   existence_t dopt_arg_exist, 
+				   existence_t sopt_arg_exist) :
+	h_opt_ct(hopt_arg_exist), 
+	d_opt_ct(dopt_arg_exist), 
+	s_opt_ct(sopt_arg_exist) {
 }
 
-program_status_t optarg_parser_ct::parse_cli_input(int argc, char **argv, char **msg_buffer) {
+program_status_t optarg_parser_ct::parse_cli_input(int argc, char **argv, 
+						   char **msg_buffer) {
 	enum parse_status_t {OPTIONS = 0, ARGUMENTS} parse_status;
 
 	if(argc == 1) {
@@ -98,25 +104,21 @@ program_status_t optarg_parser_ct::parse_cli_input(int argc, char **argv, char *
 
 	for(int index = 1; index < argc; ++index) {
 		if(parse_status == OPTIONS) {
-			if(strlen(argv[index]) == 2) {
-				if(argv[index][0] == '-') {
-					if(determine_option(index, argv) == ERROR) {
-						message_tobuffer(msg_buffer, "invalid option specified");
-						return ERROR;
-					}
-				} else {
-					message_tobuffer(msg_buffer, "invalid option specified");
-					return ERROR;
-				}
-			} else {
-				message_tobuffer(msg_buffer, "invalid option specified");
+			program_status_t program_status;
+			program_status = parse_option(argv, 
+						      msg_buffer,
+						      index);
+
+			if(program_status == ERROR)
 				return ERROR;
-			}
+
+			
 			parse_status = ARGUMENTS;
 		} else { //parse_status == ARGUMENTS
 			switch(option_buffer) {
 			case 'h':
-				message_tobuffer(msg_buffer, "no additional options/arguments can be specified with 'h' option");
+				message_tobuffer(msg_buffer, 
+				     "'h' option can only be specified alone");
 				return ERROR;
 			case 'd':
 				d_opt_ct::set_argument(argv[index]);
@@ -150,16 +152,21 @@ execution_status_t optarg_parser_ct::execute_method() {
 }
 
 program_status_t optarg_parser_ct::option_set_validity(char **msg_buffer) {
-	if(h_opt_ct::get_opt_status() == SET && (d_opt_ct::get_opt_status() == SET || s_opt_ct::get_opt_status() == SET)) {
-		message_tobuffer(msg_buffer, "no additional options/arguments can be specified with 'h' option");
+	if(h_opt_ct::get_opt_status() == SET && 
+	   (d_opt_ct::get_opt_status() == SET || 
+	    s_opt_ct::get_opt_status() == SET)) {
+		message_tobuffer(msg_buffer, 
+			"'h' option can only be specified alone");
 		return ERROR;
 	}
 	return NO_ERROR;
 }
 
 program_status_t optarg_parser_ct::argument_set_validity(char **msg_buffer) {
-	if((d_opt_ct::get_opt_status() == SET && d_opt_ct::get_arg_status() == NOT_SET) ||
-	   (s_opt_ct::get_opt_status() == SET && s_opt_ct::get_arg_status() == NOT_SET)) {
+	if((d_opt_ct::get_opt_status() == SET && 
+	    d_opt_ct::get_arg_status() == NOT_SET) ||
+	   (s_opt_ct::get_opt_status() == SET && 
+	    s_opt_ct::get_arg_status() == NOT_SET)) {
 		message_tobuffer(msg_buffer, "incomplete argument(s)");
 		return ERROR;
 	}
@@ -191,4 +198,27 @@ program_status_t optarg_parser_ct::determine_option(int index, char **argv) {
 		break;
 	}
 	return NO_ERROR;
+}
+
+program_status_t optarg_parser_ct::parse_option(char **argv,
+						char **buffer,
+						int index) {
+	if(strlen(argv[index]) == 2) {
+		if(argv[index][0] == '-') {
+			if(determine_option(index, argv) == ERROR) {
+				message_tobuffer(buffer, 
+					"invalid option specified");
+				return ERROR;
+			}
+		} 
+		else {
+			message_tobuffer(buffer, 
+				"invalid option specified");
+			return ERROR;
+		}
+	} 
+	else {
+		message_tobuffer(buffer, "invalid option specified");
+		return ERROR;
+	}
 }

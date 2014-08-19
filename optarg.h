@@ -72,15 +72,22 @@ class optarg_parser_ct : public h_opt_ct, public d_opt_ct, public s_opt_ct {
 public:
 	// this class is at the top of abstraction;
 	// initializes the existence of arguments to the possible options
-	optarg_parser_ct(existence_t hopt_arg_exist, existence_t dopt_arg_exist, existence_t sopt_arg_exist);
-	program_status_t parse_cli_input(int argc, char **argv, char **msg_buffer);
+	optarg_parser_ct(existence_t hopt_arg_exist, 
+			 existence_t dopt_arg_exist, 
+			 existence_t sopt_arg_exist);
+	program_status_t parse_cli_input(int argc, char **argv, 
+					 char **msg_buffer);
 	execution_status_t execute_method();
 private:
+	// @start utility function declarations
 	void message_tobuffer(char **buffer, char *message);
 	program_status_t determine_option(int index, char **argv);
 	char option_buffer;
 	program_status_t option_set_validity(char **msg_buffer);
 	program_status_t argument_set_validity(char **msg_buffer);
+	program_status_t parse_option(char **argv, char **buffer,
+				      int index);
+	// @end utility function declarations
 };
 
 #endif

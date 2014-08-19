@@ -10,9 +10,13 @@
 #include "defines.h"
 
 class prog_ct {
+// this class keeps track of the current state of the program with the 
+// object created
 public:
 	prog_ct();
-	program_status_t check_paths_validity(string src_path, string dest_path, char **msg_buffer);
+	program_status_t check_paths_validity(string src_path, 
+					      string dest_path, 
+					      char **msg_buffer);
 	void set_progstat(program_status_t prog_stat);
 	void exit_iferror(char *err_msg);
 private:

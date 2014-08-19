@@ -15,7 +15,7 @@
 using namespace std;
 
 #define STDERR(str, ...) fprintf(stderr, "error: " str, ##__VA_ARGS__)
-#define DEBUG(str, ...) fprintf(stdout, "debug: " str, ##__VA_ARGS__)
+#define DEBUG_PRINT(str, ...) fprintf(stdout, "debug: " str, ##__VA_ARGS__)
 
 typedef enum program_status_t {UNDEFINED = 0, ERROR, NO_ERROR} program_status_t;
 typedef enum execution_status_t {EXIT = 0, CONTINUE} execution_status_t;

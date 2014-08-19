@@ -26,9 +26,15 @@ void prog_ct::exit_iferror(char *err_msg) {
 	}
 }
 
-program_status_t prog_ct::check_paths_validity(string src_path, string dest_path, char **msg_buffer) {
+program_status_t prog_ct::check_paths_validity(string src_path, 
+					       string dest_path, 
+					       char **msg_buffer) {
+	// this function checks to see whether the source path and 
+	// destination path are both valid and if not an appropriate error
+	// message is created
 	char *current_path;
-	program_status_t src_path_status = UNDEFINED, dest_path_status = UNDEFINED;
+	program_status_t src_path_status = UNDEFINED;
+	program_status_t dest_path_status = UNDEFINED;
 
 	if(src_path.size() == 0) {
 		char *message = "source path was not specified";
@@ -70,7 +76,8 @@ program_status_t prog_ct::check_paths_validity(string src_path, string dest_path
 		strcpy(*msg_buffer, message);
 	}
 	else if(src_path_status == ERROR && dest_path_status == ERROR) {
-		char *message = "source and destination path specified is invalid";
+		char *message = 
+			"source and destination path specified is invalid";
 		size_t message_size = strlen(message);
 		*msg_buffer = new char[message_size + 1];
 		strcpy(*msg_buffer, message);
