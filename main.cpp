@@ -4,6 +4,8 @@
 //		- Denny Dimalanta
 // Created: 09, August 2014
 
+#define DEBUG_TEST
+
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -81,8 +83,8 @@ int main(int argc, char **argv) {
 	// files and directories recursively within that location is implied
 
 	// the destination is the same as the source
-	file_system_ct src_fs(src_loc, ".");
-	file_system_ct dest_fs(dest_loc, ".");
+	file_system_ct src_fs(src_loc, ".", NA);
+	file_system_ct dest_fs(dest_loc, ".", VOLATILE);
 
 	// the above file_system_ct objects only creates a container for the
 	// information of the files and directories specified at the respective

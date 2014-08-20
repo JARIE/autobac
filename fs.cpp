@@ -13,10 +13,11 @@
 
 using namespace std;
 
-file_system_ct::file_system_ct(string main_path, string root) {
+file_system_ct::file_system_ct(string main_path, string root, change_status_t file_state) {
 	file_system_ct::main_path = main_path;
 	top_level.push_back(root);
 	level = 0;
+	file_system_ct::file_state = file_state;
 }
 
 void file_system_ct::store_dir_domain(uint16_t level,
@@ -270,6 +271,26 @@ program_status_t file_system_ct::operator<<(const file_system_ct &src_fs) {
 
 			path_to_path.clear();
 
+			enum existence_status_t {NONEXISTENT = 0, EXISTS} destination_status;
+			int dest_domain;
+
+			
+
+			if(level < this->file_system.size()) {
+				destination_status = NONEXISTENT;
+				for(int i = 0; i < this->file_system[level].size(); ++i) {
+					if(this->file_system[level][i].relative_path ==
+						src_fs.file_system[level][domain].relative_path) {
+						destination_status = EXISTS;
+						dest_domain = i;
+					}
+				}
+			}
+			else {
+				destination_status = NONEXISTENT;
+			}
+
+
 			for(int dir_index = 0; 
 				dir_index < src_fs.file_system[level][domain].directories.size(); ++dir_index) {
 				if(_chdir(src_fs.file_system[level][domain].directories[dir_index].c_str())) 
@@ -283,33 +304,129 @@ program_status_t file_system_ct::operator<<(const file_system_ct &src_fs) {
 #endif
 			}
 
-			for(int file_index = 0; file_index < src_fs.file_system[level][domain].files.size(); ++file_index) {
-				string input_file = src_fs.main_path;
-				string output_file = this->main_path;
+			existence_status_t file_status;
 
-				input_file += src_fs.file_system[level][domain].relative_path;
-				output_file += src_fs.file_system[level][domain].relative_path;
+			if(destination_status == EXISTS) {
+#ifndef DEBUG_TEST
+				cout << "destination exists" << endl;
 
-				int index = src_fs.file_system[level][domain].relative_path.size();
-				if(src_fs.file_system[level][domain].relative_path[index - 1] != '/' &&
-					src_fs.file_system[level][domain].relative_path[index - 1] != '\\') {
-					input_file += "/";
-					output_file += "/";
+				int src_file_index, dest_file_index;
+#endif
+				for(int i = 0; i < src_fs.file_system[level][domain].files.size(); ++i) {
+					file_status = NONEXISTENT;
+					for(int j = 0; j < this->file_system[level][dest_domain].files.size(); ++j) {
+						if(src_fs.file_system[level][domain].files[i].name == 
+							this->file_system[level][dest_domain].files[j].name) {
+							file_status = EXISTS;
+							src_file_index = i;
+							dest_file_index = j;
+						}
+					}
+
+					if(file_status != EXISTS) {
+						string input_file = src_fs.main_path;
+						string output_file = this->main_path;
+
+						input_file += src_fs.file_system[level][domain].relative_path;
+						output_file += src_fs.file_system[level][domain].relative_path;
+
+						int index = src_fs.file_system[level][domain].relative_path.size();
+						if(src_fs.file_system[level][domain].relative_path[index - 1] != '/' &&
+							src_fs.file_system[level][domain].relative_path[index - 1] != '\\') {
+							input_file += "/";
+							output_file += "/";
+						}
+
+						input_file += src_fs.file_system[level][domain].files[i].name;
+						output_file += src_fs.file_system[level][domain].files[i].name;
+
+						ifstream input_file_fd(input_file.c_str(), ios::in | ios::binary);
+						ofstream output_file_fd(output_file.c_str(), ios::out | ios::binary);
+
+						output_file_fd << input_file_fd.rdbuf();
+
+						input_file_fd.close();
+						output_file_fd.close();
+					}
+					else {
+						if(file_state == VOLATILE) {
+							uint16_t src_dt_sum = 0, dest_dt_sum = 0;
+
+							src_dt_sum += src_fs.file_system[level][domain].files[src_file_index].date_time.month;
+							src_dt_sum += src_fs.file_system[level][domain].files[src_file_index].date_time.day;
+							src_dt_sum += src_fs.file_system[level][domain].files[src_file_index].date_time.year;
+							src_dt_sum += src_fs.file_system[level][domain].files[src_file_index].date_time.hour;
+							src_dt_sum += src_fs.file_system[level][domain].files[src_file_index].date_time.minute;
+
+							dest_dt_sum += this->file_system[level][domain].files[dest_file_index].date_time.month;
+							dest_dt_sum += this->file_system[level][domain].files[dest_file_index].date_time.day;
+							dest_dt_sum += this->file_system[level][domain].files[dest_file_index].date_time.year;
+							dest_dt_sum += this->file_system[level][domain].files[dest_file_index].date_time.hour;
+							dest_dt_sum += this->file_system[level][domain].files[dest_file_index].date_time.minute;
+
+							if(src_dt_sum > dest_dt_sum) {
+								string input_file = src_fs.main_path;
+								string output_file = this->main_path;
+
+								input_file += src_fs.file_system[level][domain].relative_path;
+								output_file += src_fs.file_system[level][domain].relative_path;
+
+								int index = src_fs.file_system[level][domain].relative_path.size();
+								if(src_fs.file_system[level][domain].relative_path[index - 1] != '/' &&
+									src_fs.file_system[level][domain].relative_path[index - 1] != '\\') {
+									input_file += "/";
+									output_file += "/";
+								}
+
+								input_file += src_fs.file_system[level][domain].files[i].name;
+								output_file += src_fs.file_system[level][domain].files[i].name;
+
+								ifstream input_file_fd(input_file.c_str(), ios::in | ios::binary);
+								ofstream output_file_fd(output_file.c_str(), ios::out | ios::binary);
+
+								output_file_fd << input_file_fd.rdbuf();
+
+								input_file_fd.close();
+								output_file_fd.close();
+							}
+
+
+						}
+					}
 				}
+			}
+			else {
+#ifdef DEBUG_TEST
+				cout << "destination does not exist" << endl;
+#endif
+				for(int file_index = 0; file_index < src_fs.file_system[level][domain].files.size(); ++file_index) {
+					string input_file = src_fs.main_path;
+					string output_file = this->main_path;
 
-				input_file += src_fs.file_system[level][domain].files[file_index].name;
-				output_file += src_fs.file_system[level][domain].files[file_index].name;
+					input_file += src_fs.file_system[level][domain].relative_path;
+					output_file += src_fs.file_system[level][domain].relative_path;
 
-				DEBUG_PRINT("input file: %s\n", input_file.c_str());
-				DEBUG_PRINT("output file: %s\n", output_file.c_str());
+					int index = src_fs.file_system[level][domain].relative_path.size();
+					if(src_fs.file_system[level][domain].relative_path[index - 1] != '/' &&
+						src_fs.file_system[level][domain].relative_path[index - 1] != '\\') {
+						input_file += "/";
+						output_file += "/";
+					}
 
-				ifstream input_file_fd(input_file.c_str(), ios::in | ios::binary);
-				ofstream output_file_fd(output_file.c_str(), ios::out | ios::binary);
+					input_file += src_fs.file_system[level][domain].files[file_index].name;
+					output_file += src_fs.file_system[level][domain].files[file_index].name;
 
-				output_file_fd << input_file_fd.rdbuf();
+					DEBUG_PRINT("input file: %s\n", input_file.c_str());
+					DEBUG_PRINT("output file: %s\n", output_file.c_str());
 
-				input_file_fd.close();
-				output_file_fd.close();
+					ifstream input_file_fd(input_file.c_str(), ios::in | ios::binary);
+					ofstream output_file_fd(output_file.c_str(), ios::out | ios::binary);
+
+					output_file_fd << input_file_fd.rdbuf();
+
+					input_file_fd.close();
+					output_file_fd.close();
+				}
 			}
 		}
 	}

@@ -16,7 +16,7 @@ using namespace std;
 
 class file_system_ct : public dirparser_ct {
 public:
-	file_system_ct(string main_path, string root);
+	file_system_ct(string main_path, string root, change_status_t file_state);
 	void store_dir_domain(uint16_t level, vector<file_st> files, 
 			      string relative_path, 
 			      vector<string> directories);
@@ -73,6 +73,8 @@ private:
 	vector<string> current_level;
 	// keeps track of what level to store a given domain
 	uint16_t level;
+
+	change_status_t file_state;
 };
 
 /*

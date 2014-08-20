@@ -20,6 +20,7 @@ using namespace std;
 typedef enum program_status_t {UNDEFINED = 0, ERROR, NO_ERROR} program_status_t;
 typedef enum execution_status_t {EXIT = 0, CONTINUE} execution_status_t;
 typedef enum directory_status_t {EMPTY = 0, NON_EMPTY} directory_status_t;
+typedef enum change_status_t {NA = 0, VOLATILE, NONVOLATILE} chang_status_t;
 
 typedef struct date_time_st {
 	uint16_t month;
