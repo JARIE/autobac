@@ -44,8 +44,9 @@ directory_status_t dirparser_ct::parse_dir_domain() {
 			file_st file;
 			extract_file_attributes(buffer, &file);
 			extract_file_name(buffer, &file);
-
+#ifdef DEBUG
 			cout << "file: " << file.name << endl;
+#endif
 
 			dir_curr_domain.files.push_back(file);
 		}

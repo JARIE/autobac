@@ -110,7 +110,9 @@ void file_system_ct::populate_filesys() {
 	_chdir(main_path.c_str());
 
 	path_now = _getcwd(NULL, 0);
+#ifdef DEBUG
 	cout << path_now << endl;
+#endif
 	free(path_now);
 
 	loop_status = CONTINUE;
@@ -307,11 +309,11 @@ program_status_t file_system_ct::operator<<(const file_system_ct &src_fs) {
 			existence_status_t file_status;
 
 			if(destination_status == EXISTS) {
-#ifndef DEBUG_TEST
+#ifdef DEBUG_TEST
 				cout << "destination exists" << endl;
-
-				int src_file_index, dest_file_index;
 #endif
+				int src_file_index, dest_file_index;
+
 				for(int i = 0; i < src_fs.file_system[level][domain].files.size(); ++i) {
 					file_status = NONEXISTENT;
 					for(int j = 0; j < this->file_system[level][dest_domain].files.size(); ++j) {
@@ -415,9 +417,6 @@ program_status_t file_system_ct::operator<<(const file_system_ct &src_fs) {
 
 					input_file += src_fs.file_system[level][domain].files[file_index].name;
 					output_file += src_fs.file_system[level][domain].files[file_index].name;
-
-					DEBUG_PRINT("input file: %s\n", input_file.c_str());
-					DEBUG_PRINT("output file: %s\n", output_file.c_str());
 
 					ifstream input_file_fd(input_file.c_str(), ios::in | ios::binary);
 					ofstream output_file_fd(output_file.c_str(), ios::out | ios::binary);
