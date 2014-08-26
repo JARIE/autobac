@@ -118,3 +118,4 @@ in this case nodes 2 through 5 and conducts the same process as it did for node 
 This is repeated until there are no more levels, or more specifically nodes to search 
 and extract information from.
 
+![Flowchart](https://raw.github.com/JARIE/autobac/master/mics/images/flowchart.png)
